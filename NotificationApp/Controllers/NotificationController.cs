@@ -5,6 +5,9 @@ using NotificationApp.Managers;
 
 namespace NotificationApp.Controllers
 {
+    /// <summary>
+    /// Notification Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class NotificationController : ControllerBase
@@ -23,20 +26,29 @@ namespace NotificationApp.Controllers
             _pushNotificationManager = pushNotificationManager;
             _logger = logger;
         }
-
+        /// <summary>
+        /// Send Notification as per type
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>bool</returns>
         [HttpPost("SendNotificationWithType")]
-        public async Task<bool> SendNotification([FromBody] NotificationRequest request)
+        public async Task<IActionResult> SendNotification([FromBody] NotificationRequest request)
         {
             var type = request.Type;
             var to = request.To;
             var message = request.Message;
 
             bool res = await _notificationManager.SendNotification(type, to, message);
-            return res;
+            return Ok(res);
         }
 
+        /// <summary>
+        /// Send Email Notification method
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>bool</returns>
         [HttpPost("SendEmail")]
-        public async Task<bool> SendEmail([FromBody] NotificationDTO request)
+        public async Task<IActionResult> SendEmail([FromBody] Request request)
         {
             try
             {
@@ -45,32 +57,43 @@ namespace NotificationApp.Controllers
                 var message = request.Message;
 
                 bool res = await _emailNotificationManager.SendEmailNotification(to, message);
-                return res;
+                return Ok(res);
             }
             catch (Exception ex)
             {
                 _logger.LogError(message: ex.Message, ex);
-                throw;
+                return BadRequest(ex.Message);
             }
         }
+        
+        /// <summary>
+        /// Send SMS Notification method
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>bool</returns>
         [HttpPost("SendSMS")]
-        public async Task<bool> SendSMS([FromBody] NotificationDTO request)
+        public async Task<IActionResult> SendSMS([FromBody] Request request)
         {
             var to = request.To;
             var message = request.Message;
 
             bool res = await _smsNotificationManager.SendSMSNotification(to, message);
-            return res;
+            return Ok(res);
         }
-
+       
+        /// <summary>
+        /// Push Notification to device this is supposed to be used from frontend side to complete cycle
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>bool</returns>
         [HttpPost("PushNotification")]
-        public async Task<bool> PushNotification([FromBody] NotificationDTO request)
+        public async Task<IActionResult> PushNotification([FromBody] Request request)
         {
             var to = request.To;
             var message = request.Message;
 
             bool res = await _pushNotificationManager.SendPushNotification(to, message);
-            return res;
+            return Ok(res);
         }
     }
 }

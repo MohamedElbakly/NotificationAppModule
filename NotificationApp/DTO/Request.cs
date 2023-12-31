@@ -1,6 +1,6 @@
 ﻿namespace NotificationApp.DTO
 {
-    public class NotificationDTO
+    public class Request
     {
         public string To { get; set; }
         public string Message { get; set; }
